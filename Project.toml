@@ -6,8 +6,14 @@ version = "0.1.0"
 [compat]
 julia = "1.6.1"
 
+[GarishPrint.color]
+name = "light_blue"
+
 [extras]
 Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
+
+[preferences.GarishPrint.color]
+name = "light_blue"
 
 [targets]
 test = ["Test"]
