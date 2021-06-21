@@ -84,6 +84,7 @@ x = Example(
         "empty set" => Set(),
         "set" => Set([1, 2, 3]),
         "set{any}" => Set(Any[1, 2, 3]),
+        "type" => Any,
     ),
     undef,
     ABC(nothing, 1.2+2.1im, π),
