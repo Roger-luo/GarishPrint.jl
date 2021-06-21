@@ -85,3 +85,5 @@ x = Example(
 )
 
 pprint(x)
+pprint(x; color=false)
+pprint(x; compact=true)
