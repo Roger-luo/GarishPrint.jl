@@ -79,6 +79,7 @@ x = Example(
             ABC(1, 2.0im, 3.12f0),
         ),
         "str" => Set([1, 2, 3]),
+        "boolean"=> false,
     ),
     undef,
     ABC(nothing, 1.2+2.1im, π),
@@ -87,3 +88,4 @@ x = Example(
 pprint(x)
 pprint(x; color=false)
 pprint(x; compact=true)
+pprint(x; show_indent=false)

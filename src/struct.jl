@@ -1,6 +1,6 @@
 function pprint_struct(io::GarishIO, ::MIME"text/plain", @nospecialize(x))
     t = typeof(x)
-    printstyled(io, t; color=io.color.type); print(io.bland_io, "(")
+    print_token(io, :type, t); print(io.bland_io, "(")
 
     nf = nfields(x)::Int
     nf == 0 && return print(io.bland_io, ")")
@@ -10,7 +10,7 @@ function pprint_struct(io::GarishIO, ::MIME"text/plain", @nospecialize(x))
         for i in 1:nf
             f = fieldname(t, i)
             print_indent(io)
-            printstyled(io.bland_io, f; color=io.color.fieldname)
+            print_token(io, :fieldname, f)
             if io.compact
                 print(io.bland_io, "=")
             else

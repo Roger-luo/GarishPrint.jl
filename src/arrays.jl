@@ -18,7 +18,7 @@ function pprint_zero_dim(io::GarishIO, X::AbstractArray{T, 0}) where T
         print(io, "fill(")
         pprint(io, X[])
     else
-        printstyled(io, "Array{", T, ", 0}("; color=io.color.type)
+        print_token(io, :type, "Array{", T, ", 0}(")
         print_undef(io)
     end
     print(io, ")")
@@ -28,7 +28,7 @@ end
 function pprint_list_like(io::GarishIO, list, opn='[', cls=']'; compact::Bool=io.compact)
     prefix, implicit = typeinfo_prefix(io.bland_io, list)
     io.state.noindent_in_first_line || print_indent(io)
-    printstyled(io, prefix; color=io.color.type)
+    print_token(io, :type, prefix)
 
     # directly or indirectly, the context now knows about eltype(v)
     if !implicit

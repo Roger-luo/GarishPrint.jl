@@ -1,13 +1,13 @@
 function pprint(io::GarishIO, ::MIME"text/plain", s::Set)
     if isempty(s)
         if get(io, :typeinfo, Any) == typeof(s)
-            printstyled(io, "Set"; color=io.color.type)
+            print_token(io, :type, "Set")
         else
-            printstyled(io, typeof(s); color=io.color.type)
+            print_token(io, :type, typeof(s))
             print(io, "()")
         end
     else
-        printstyled(io, "Set"; color=io.color.type)
+        print_token(io, :type, "Set")
         print(io, "(")
         pprint_list_like(io, s)
         print(io, ")")

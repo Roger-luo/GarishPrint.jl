@@ -9,11 +9,11 @@ function pprint(io::GarishIO, ::MIME"text/plain", s::Pair)
 end
 
 function pprint(io::GarishIO, ::MIME"text/plain", bool::Bool)
-    Base.with_output_color(show, io.color.constant, io, bool)
+    print_token(show, io, :constant, bool)
 end
 
 function pprint(io::GarishIO, ::MIME"text/plain", s::AbstractString)
-    Base.with_output_color(show, io.color.string, io, s)
+    print_token(show, io, :string, s)
 end
 
 pprint(io::GarishIO, ::MIME"text/plain", ::UndefInitializer) = print_undef(io)
@@ -21,13 +21,13 @@ pprint(io::GarishIO, ::MIME"text/plain", ::Nothing) = print_nothing(io)
 pprint(io::GarishIO, ::MIME"text/plain", ::Missing) = print_missing(io)
 
 function print_nothing(io::GarishIO)
-    printstyled(io.bland_io, "nothing"; color=io.color.constant)
+    print_token(io, :constant, "nothing")
 end
 
 function print_missing(io::GarishIO)
-    printstyled(io.bland_io, "missing"; color=io.color.constant)
+    print_token(io, :constant, "missing")
 end
 
 function print_undef(io::GarishIO)
-    printstyled(io.bland_io, "undef"; color=io.color.undef)
+    print_token(io, :undef, "undef")
 end

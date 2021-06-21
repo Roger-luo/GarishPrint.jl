@@ -116,6 +116,7 @@ end
 Base.write(io::GarishIO, x) = _write(io, x)
 Base.write(io::GarishIO, x::UInt8) = _write(io, x)
 Base.write(io::GarishIO, x::Char) = _write(io, x)
+Base.write(io::GarishIO, x::Symbol) = _write(io, x)
 Base.write(io::GarishIO, x::Array) = _write(io, x)
 Base.write(io::GarishIO, x::AbstractArray) = _write(io, x)
 Base.write(io::GarishIO, s::AbstractString) = _write(io, s)
@@ -157,6 +158,15 @@ end
 
 function GarishIO(io::IO, garish_io::GarishIO; indent::Int=garish_io.indent, compact::Bool=garish_io.compact)
     GarishIO(io, indent, compact, garish_io.show_indent, garish_io.color, garish_io.state)
+end
+
+function print_token(io::GarishIO, type::Symbol, xs...)
+    print_token(print, io, type, xs...)
+end
+
+function print_token(f, io::GarishIO, type::Symbol, xs...)
+    isnothing(io.color) && return f(io, xs...)
+    Base.with_output_color(f, getfield(io.color, type), io, xs...)
 end
 
 pprint(xs...; kw...) = pprint(stdout, xs...; kw...)
@@ -258,7 +268,7 @@ function pprint(io::GarishIO, mime::MIME, @specialize(x::Type))
 end
 
 function pprint(io::GarishIO, mime::MIME"text/plain", @specialize(x::Type))
-    printstyled(io, x; color=io.color.type)
+    print_token(io, :type, x)
 end
 
 function print_indent(io::GarishIO)
@@ -267,17 +277,15 @@ function print_indent(io::GarishIO)
 
     io.show_indent || return print(io, " "^(io.indent * io.state.level))
     for _ in 1:io.state.level
-        printstyled(io, "│"; color=io.color.comment)
+        print_token(io, :comment, "│")
         print(io, " "^(io.indent - 1))
     end
 end
 
 function print_operator(io::GarishIO, op)
-    if io.compact
-        printstyled(io, op; color=io.color.operator)
-    else
-        printstyled(io, " ", op, " "; color=io.color.operator)
-    end
+    io.compact || print(io, " ")
+    print_token(io, :operator, op)
+    io.compact || print(io, " ")
 end
 
 include("struct.jl")
