@@ -16,6 +16,7 @@ function tty_has_color()
 end
 
 function supports_color256()
+    haskey(ENV, "TERM") || return false
     try
         return parse(Int, readchomp(`tput colors 0`)) == 256
     catch
