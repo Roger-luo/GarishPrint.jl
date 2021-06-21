@@ -17,7 +17,7 @@ end
 
 function supports_color256()
     try
-        return parse(Int, readchomp(`tput colors`)) == 256
+        return parse(Int, readchomp(`tput colors 0`)) == 256
     catch
         return false
     end
