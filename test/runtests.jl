@@ -58,3 +58,30 @@ pprint(T5(Dict("a"=>2.0, "b"=>2im)))
 pprint(T5(Dict("a"=>T4(T5([1, 2, 3]), T5([1, 2, 3])), "b"=>2im)))
 
 pprint(T5(Dict("a"=>(1, 2, 3), "b"=>Any)))
+
+struct ABC{T1, T2, T3}
+    hee::T1
+    haa::T2
+    hoo::T3
+end
+
+struct Example{T1, T2}
+    field_a::T1
+    field_b::T2
+    abc::ABC
+end
+
+x = Example(
+    Dict(
+        "a"=>Example(
+            [1, 2, 3],
+            2.0,
+            ABC(1, 2.0im, 3.12f0),
+        ),
+        "str" => Set([1, 2, 3]),
+    ),
+    undef,
+    ABC(nothing, 1.2+2.1im, π),
+)
+
+pprint(x)
