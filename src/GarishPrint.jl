@@ -98,6 +98,7 @@ struct GarishIO{IO_t <: IO} <: IO
     bland_io::IO_t
     indent::Int
     compact::Bool
+    width::Int
     show_indent::Bool
     # use nothing for no color print
     color::Union{Nothing, ColorPreference}
@@ -137,6 +138,7 @@ end
 function GarishIO(io::IO; 
         indent::Int=2,
         compact::Bool=get(io, :compact, false),
+        width::Int=displaysize(io)[2],
         show_indent::Bool=true,
         color::Bool=true,
         kw...
@@ -153,11 +155,17 @@ function GarishIO(io::IO;
         end
         color_prefs = nothing
     end
-    return GarishIO(io, indent, compact, show_indent, color_prefs, PrintState())
+    return GarishIO(io, indent, compact, width, show_indent, color_prefs, PrintState())
 end
 
 function GarishIO(io::IO, garish_io::GarishIO; indent::Int=garish_io.indent, compact::Bool=garish_io.compact)
-    GarishIO(io, indent, compact, garish_io.show_indent, garish_io.color, garish_io.state)
+    GarishIO(
+        io, indent, compact,
+        garish_io.width,
+        garish_io.show_indent,
+        garish_io.color,
+        garish_io.state
+    )
 end
 
 function print_token(io::GarishIO, type::Symbol, xs...)
@@ -180,6 +188,8 @@ Pretty print given objects `xs` to `io`, default io is `stdout`.
 
 - `indent::Int`: indent size, default is `2`.
 - `compact::Bool`: whether print withint one line, default is `get(io, :compact, false)`.
+- `width::Int`: the width hint of printed string, note this is not stricted obeyed,
+default is displaysize(io)[2].
 - `show_indent::Bool`: whether print indentation hint, default is `true`.
 - `color::Bool`: whether print with color, default is `true`.
 

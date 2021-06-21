@@ -5,6 +5,10 @@ function pprint_struct(io::GarishIO, ::MIME"text/plain", @nospecialize(x))
     nf = nfields(x)::Int
     nf == 0 && return print(io.bland_io, ")")
 
+    # make sure we can print the type in one line
+    max_indent_reached = io.indent * io.state.level + length(string(t)) + 5 > io.width
+    max_indent_reached && return print(io.bland_io, " … )")
+
     io.compact || println(io.bland_io)
     within_nextlevel(io) do
         for i in 1:nf

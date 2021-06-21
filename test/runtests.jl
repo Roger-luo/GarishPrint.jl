@@ -79,8 +79,19 @@ x = Example(
         "missing" => missing,
         "empty set" => Set(),
         "set" => Set([1, 2, 3]),
-        "set{any}" => Set(Any[1, 2, 3]),
+        "set{any}" => Set(Any[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13]),
         "type" => Any,
+        "nested" => Example(
+            Dict(
+                "a"=>Example(
+                    [1, 2, 3],
+                    2.0,
+                    ABC(1, 2.0im, 3.12f0),
+                ),
+            ),
+            undef,
+            ABC(nothing, 1.2+2.1im, π),
+        )
     ),
     undef,
     ABC(nothing, 1.2+2.1im, π),
@@ -90,3 +101,5 @@ pprint(x)
 pprint(x; color=false)
 pprint(x; compact=true)
 pprint(x; show_indent=false)
+
+pprint(IOContext(stdout, :color=>false), x)

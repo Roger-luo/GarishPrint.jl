@@ -3,7 +3,12 @@ function pprint(io::GarishIO, ::MIME"text/plain", X::AbstractArray)
 
     if ndims(X) == 1
         # io.compact && return pprint_list_like(io, X)
-        pprint_list_like(io, X)
+        # heurostics to print vector in compact form
+        if length(X) < 20 && io.indent * io.state.level + length(string(X)) < io.width
+            pprint_list_like(io, X; compact=true)
+        else
+            pprint_list_like(io, X)
+        end
         return
     end
     # fallback to compact show for high dimensional arrays
