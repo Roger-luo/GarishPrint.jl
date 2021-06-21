@@ -26,7 +26,7 @@ end
 
 # NOTE: modified based on base/arrayshow.jl:show_vector
 function pprint_list_like(io::GarishIO, list, opn='[', cls=']'; compact::Bool=io.compact)
-    prefix, implicit = Base.typeinfo_prefix(io.bland_io, list)
+    prefix, implicit = typeinfo_prefix(io.bland_io, list)
     io.state.noindent_in_first_line || print_indent(io)
     printstyled(io, prefix; color=io.color.type)
 
@@ -99,4 +99,52 @@ function pprint_delim_list(io::GarishIO, itr, op, delim, cl, delim_one, compact,
     end
     compact || print_indent(io)
     print(io.bland_io, cl)
+end
+
+
+# NOTE: copied from base/arrayshow.jl:typeinfo_prefix(io::IO, X) for compatiblity
+function typeinfo_prefix(io::IO, X)
+    typeinfo = get(io, :typeinfo, Any)::Type
+
+    if !(X isa typeinfo)
+        typeinfo = Any
+    end
+
+    # what the context already knows about the eltype of X:
+    eltype_ctx = Base.typeinfo_eltype(typeinfo)
+    eltype_X = eltype(X)
+
+    if X isa AbstractDict
+        if eltype_X == eltype_ctx
+            sprint(Base.show_type_name, typeof(X).name), false
+        elseif !isempty(X) && typeinfo_implicit(keytype(X)) && typeinfo_implicit(valtype(X))
+            sprint(Base.show_type_name, typeof(X).name), true
+        else
+            string(typeof(X)), false
+        end
+    else
+        # Types hard-coded here are those which are created by default for a given syntax
+        if eltype_X == eltype_ctx
+            "", false
+        elseif !isempty(X) && typeinfo_implicit(eltype_X)
+            "", true
+        elseif Base.print_without_params(eltype_X)
+            sprint(Base.show_type_name, Base.unwrap_unionall(eltype_X).name), false # Print "Array" rather than "Array{T,N}"
+        else
+            string(eltype_X), false
+        end
+    end
+end
+
+# NOTE: copied from base/arrayshow.jl:typeinfo_implicit(@nospecialize(T)) for compatiblity
+# types that can be parsed back accurately from their un-decorated representations
+function typeinfo_implicit(@nospecialize(T))
+    if T === Float64 || T === Int || T === Char || T === String || T === Symbol ||
+        Base.issingletontype(T)
+        return true
+    end
+    return isconcretetype(T) &&
+        ((T <: Array && typeinfo_implicit(eltype(T))) ||
+         ((T <: Tuple || T <: Pair) && all(typeinfo_implicit, fieldtypes(T))) ||
+         (T <: AbstractDict && typeinfo_implicit(keytype(T)) && typeinfo_implicit(valtype(T))))
 end
