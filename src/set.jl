@@ -11,7 +11,7 @@ function pprint(io::GarishIO, ::MIME"text/plain", s::Set)
         print(io, "(")
         # io.compact && return pprint_list_like(io, X)
         # heurostics to print vector in compact form
-        if length(s) < 20 && io.indent * io.state.level + length(string(s)) + io.state.offset < io.width
+        if length(s) < 20 && !max_indent_reached(io, length(string(s)))
             pprint_list_like(io, s; compact=true)
         else
             pprint_list_like(io, s)

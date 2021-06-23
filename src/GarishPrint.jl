@@ -403,6 +403,10 @@ function print_operator(io::GarishIO, op)
     io.compact || print(io, " ")
 end
 
+function max_indent_reached(io::GarishIO, offset::Int)
+    io.indent * io.state.level + io.state.offset + offset > io.width
+end
+
 include("struct.jl")
 include("numbers.jl")
 include("arrays.jl")

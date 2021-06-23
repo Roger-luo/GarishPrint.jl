@@ -11,8 +11,8 @@ function pprint_struct(io::GarishIO, ::MIME"text/plain", @nospecialize(x))
     nf == 0 && return print(io.bland_io, ")")
 
     # make sure we can print the type in one line, or we should print it in ...
-    max_indent_reached = io.indent * io.state.level + io.state.offset + length(string(t)) + 2 > io.width
-    max_indent_reached && return print(io.bland_io, " … )")
+    # max_indent_reached = io.indent * io.state.level + io.state.offset + length(string(t)) + 2 > io.width
+    max_indent_reached(io, length(string(t)) + 2) && return print(io.bland_io, " … )")
 
     io.compact || println(io.bland_io)
     within_nextlevel(io) do
