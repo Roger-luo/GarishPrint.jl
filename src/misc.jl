@@ -5,6 +5,11 @@ end
 function pprint(io::GarishIO, ::MIME"text/plain", s::Pair)
     pprint(io, s.first)
     print_operator(io, "=>")
+    if !io.compact
+        buf = IOBuffer()
+        pprint(GarishIO(IOContext(buf, :color=>false), io), s.first)
+        io.state.offset = length(String(take!(buf))) + 4
+    end
     pprint(io, s.second)
 end
 

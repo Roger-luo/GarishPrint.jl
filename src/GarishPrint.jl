@@ -126,9 +126,13 @@ mutable struct PrintState
     type::PrintType
     noindent_in_first_line::Bool
     level::Int
+    # the offset that should be applied
+    # to whoever cares, e.g for the field
+    # values
+    offset::Int
 end
 
-PrintState() = PrintState(Unknown, false, 0)
+PrintState() = PrintState(Unknown, false, 0, 0)
 
 """
     GarishIO{IO_t <: IO} <: IO
@@ -229,12 +233,21 @@ based on an existing garish io preference. The preference can
 be overloaded by `kw`. See [`pprint`](@ref) for the available
 keyword arguments.
 """
-function GarishIO(io::IO, garish_io::GarishIO; indent::Int=garish_io.indent, compact::Bool=garish_io.compact)
+function GarishIO(io::IO, garish_io::GarishIO;
+        indent::Int=garish_io.indent, compact::Bool=garish_io.compact,
+    )
+
+    if haskey(io, :color) && io[:color] == false
+        color = nothing
+    else
+        color = garish_io.color
+    end
+    
     GarishIO(
         io, indent, compact,
         garish_io.width,
         garish_io.show_indent,
-        garish_io.color,
+        color,
         garish_io.state
     )
 end

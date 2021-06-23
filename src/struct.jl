@@ -10,8 +10,8 @@ function pprint_struct(io::GarishIO, ::MIME"text/plain", @nospecialize(x))
     nf = nfields(x)::Int
     nf == 0 && return print(io.bland_io, ")")
 
-    # make sure we can print the type in one line
-    max_indent_reached = io.indent * io.state.level + length(string(t)) + 5 > io.width
+    # make sure we can print the type in one line, or we should print it in ...
+    max_indent_reached = io.indent * io.state.level + io.state.offset + length(string(t)) + 2 > io.width
     max_indent_reached && return print(io.bland_io, " … )")
 
     io.compact || println(io.bland_io)
@@ -24,6 +24,7 @@ function pprint_struct(io::GarishIO, ::MIME"text/plain", @nospecialize(x))
                 print(io.bland_io, "=")
             else
                 print(io.bland_io, " = ")
+                io.state.offset = 3 + length(string(f))
             end
 
             if !isdefined(x, f) # print undef as comment color
