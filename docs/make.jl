@@ -13,7 +13,6 @@ makedocs(;
     ),
     pages = [
         "Home" => "index.md",
-        "Advanced Usage" => "advance.md",
         "References" => "ref.md",
     ],
     repo = "https://github.com/Roger-luo/GarishPrint.jl",

@@ -67,7 +67,7 @@ pprint(x)
 
 it will print the following
 
-![readme-example](docs/src/assets/readme-example.png)
+![readme-example](assets/readme-example.png)
 
 
 ## License

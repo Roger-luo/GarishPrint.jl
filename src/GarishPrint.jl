@@ -7,6 +7,12 @@ export pprint
     isnothing(x) = x === nothing
 end
 
+"""
+    tty_has_color()
+
+Check if TTY supports color. This is mainly for lower
+Julia version like 1.0.
+"""
 function tty_has_color()
     if isdefined(Base, :get_have_color)
         return Base.get_have_color()
@@ -15,6 +21,11 @@ function tty_has_color()
     end
 end
 
+"""
+    supports_color256()
+
+Check if the terminal supports color 256.
+"""
 function supports_color256()
     haskey(ENV, "TERM") || return false
     try
@@ -26,6 +37,11 @@ end
 
 const ColorType = Union{Int, Symbol}
 
+"""
+    ColorPreference
+
+The color preference type.
+"""
 struct ColorPreference
     fieldname::ColorType
     type::ColorType
@@ -43,12 +59,22 @@ struct ColorPreference
     linenumber::ColorType
 end
 
+"""
+    ColorPreference(;kw...)
+
+See [`pprint`](@ref) for available keyword configurations.
+"""
 function ColorPreference(;kw...)
     default = supports_color256() ? default_colors_256() : default_colors_ansi()
     colors = merge(default, kw)
     return ColorPreference([colors[name] for name in fieldnames(ColorPreference)]...)
 end
 
+"""
+    default_colors_ansi()
+
+The default ANSI color theme.
+"""
 function default_colors_ansi()
     Dict(
         :fieldname => :light_blue,
@@ -64,6 +90,11 @@ function default_colors_ansi()
     )
 end
 
+"""
+    default_colors_256()
+
+The default color 256 theme.
+"""
 function default_colors_256()
     Dict(
         :fieldname => 039,
@@ -80,6 +111,12 @@ function default_colors_256()
     )
 end
 
+"""
+    @enum PrintType
+
+`PrintType` to tell lower level printing some useful context.
+Currently only supports `Unknown` and `StructField`.
+"""
 @enum PrintType begin
     Unknown
     StructField
@@ -93,6 +130,21 @@ end
 
 PrintState() = PrintState(Unknown, false, 0)
 
+"""
+    GarishIO{IO_t <: IO} <: IO
+
+`GarishIO` contains the pretty printing preference and states.
+
+# Members
+
+- `bland_io::IO_t`: the original io.
+- `indent::Int`: indentation size.
+- `compact::Bool`: whether the printing should be compact.
+- `width::Int`: the terminal width.
+- `show_indent`: print the indentation hint or not.
+- `color`: color preference, either `ColorPreference` or `nothing` for no color.
+- `state`: the state of the printer, see [`PrintState`](@ref).
+"""
 struct GarishIO{IO_t <: IO} <: IO
     # the bland io we want look nice
     bland_io::IO_t
@@ -107,6 +159,12 @@ end
 
 _write(io::GarishIO, x) = write(IOContext(io.bland_io, :color=>isnothing(io.color), :compact=>io.compact), x)
 
+"""
+    within_nextlevel(f, io::GarishIO)
+
+Run `f()` within the next level of indentation where `f` is a function
+that print into `io`.
+"""
 function within_nextlevel(f, io::GarishIO)
     io.state.level += 1
     ret = f()
@@ -135,6 +193,11 @@ function Base.get(io::GarishIO, key::Symbol, default)
     end
 end
 
+"""
+    GarishIO(io::IO; kw...)
+
+See [`pprint`](@ref) for available keywords.
+"""
 function GarishIO(io::IO; 
         indent::Int=2,
         compact::Bool=get(io, :compact, false),
@@ -158,6 +221,14 @@ function GarishIO(io::IO;
     return GarishIO(io, indent, compact, width, show_indent, color_prefs, PrintState())
 end
 
+"""
+    GarishIO(io::IO, garish_io::GarishIO; kw...)
+
+Create a new similar `GarishIO` with new bland IO object `io`
+based on an existing garish io preference. The preference can
+be overloaded by `kw`. See [`pprint`](@ref) for the available
+keyword arguments.
+"""
 function GarishIO(io::IO, garish_io::GarishIO; indent::Int=garish_io.indent, compact::Bool=garish_io.compact)
     GarishIO(
         io, indent, compact,
@@ -168,10 +239,21 @@ function GarishIO(io::IO, garish_io::GarishIO; indent::Int=garish_io.indent, com
     )
 end
 
+"""
+    print_token(io::GarishIO, type::Symbol, xs...)
+
+Print `xs` to a `GarishIO` as given token type. The token type
+should match the field name of `ColorPreference`.
+"""
 function print_token(io::GarishIO, type::Symbol, xs...)
     print_token(print, io, type, xs...)
 end
 
+"""
+    print_token(f, io::GarishIO, type::Symbol, xs...)
+
+Print `xs` to a `GarishIO` as given token type using `f(io, xs...)`
+"""
 function print_token(f, io::GarishIO, type::Symbol, xs...)
     isnothing(io.color) && return f(io, xs...)
     Base.with_output_color(f, getfield(io.color, type), io, xs...)
@@ -281,6 +363,11 @@ function pprint(io::GarishIO, mime::MIME"text/plain", @specialize(x::Type))
     print_token(io, :type, x)
 end
 
+"""
+    print_indent(io::GarishIO)
+
+Print an indentation. This should be only used under `MIME"text/plain"` or equivalent.
+"""
 function print_indent(io::GarishIO)
     io.compact && return
     io.state.level > 0 || return
@@ -292,6 +379,11 @@ function print_indent(io::GarishIO)
     end
 end
 
+"""
+    print_operator(io::GarishIO, op)
+
+Print an operator, such as `=`, `+`, `=>` etc. This should be only used under `MIME"text/plain"` or equivalent.
+"""
 function print_operator(io::GarishIO, op)
     io.compact || print(io, " ")
     print_token(io, :operator, op)

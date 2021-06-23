@@ -1,3 +1,8 @@
+"""
+    pprint_struct(io::GarishIO, ::MIME, x)
+
+Print `x` as a struct type.
+"""
 function pprint_struct(io::GarishIO, ::MIME"text/plain", @nospecialize(x))
     t = typeof(x)
     print_token(io, :type, t); print(io.bland_io, "(")

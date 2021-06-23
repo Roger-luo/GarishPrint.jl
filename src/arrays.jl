@@ -30,6 +30,24 @@ function pprint_zero_dim(io::GarishIO, X::AbstractArray{T, 0}) where T
 end
 
 # NOTE: modified based on base/arrayshow.jl:show_vector
+
+"""
+    pprint_list_like(io::GarishIO, list, opn='[', cls=']'; compact::Bool=io.compact)
+
+Print a list-like object `list`. A list-like object should support the iterable interface
+such as `Base.iterate` and `Base.length`. This is modified based on `base/arrayshow.jl:show_vector`.
+
+# Arguments
+
+- `io::GarishIO`: the `GarishIO` object one wants to print to.
+- `list`: the list-like object.
+- `opn`: the openning marker, default is `[`.
+- `cls`: the closing marker, default is `]`.
+
+# Keyword Arguments
+
+- `compact::Bool`: print the list within one line or not.
+"""
 function pprint_list_like(io::GarishIO, list, opn='[', cls=']'; compact::Bool=io.compact)
     prefix, implicit = typeinfo_prefix(io.bland_io, list)
     io.state.noindent_in_first_line || print_indent(io)
