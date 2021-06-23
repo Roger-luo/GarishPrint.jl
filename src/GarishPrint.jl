@@ -290,6 +290,13 @@ pprint(xs...; kw...) = pprint(stdout, xs...; kw...)
 
 Pretty print given objects `xs` to `io`, default io is `stdout`.
 
+!!! note
+
+    `pprint` will detect if an object type has overloaded `Base.show`,
+    and use that if possible, overloading `Base.show` to `GarishPrint`
+    for custom type should use [`pprint_struct`](@ref) to avoid
+    recursive call into `Base.show`.
+
 # Keyword Arguments
 
 - `indent::Int`: indent size, default is `2`.
