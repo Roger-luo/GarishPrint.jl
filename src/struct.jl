@@ -30,7 +30,8 @@ function pprint_struct(io::GarishIO, ::MIME"text/plain", @nospecialize(x))
             if !isdefined(x, f) # print undef as comment color
                 print_undef(io)
             else
-                pprint_field(io, getfield(x, i))
+                new_io = GarishIO(IOContext(io.bland_io, :limit=>true), io)
+                pprint_field(new_io, getfield(x, i))
             end
 
             if !io.compact || i < nf
