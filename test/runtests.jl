@@ -67,6 +67,10 @@ struct Example{T1, T2}
     abc::ABC
 end
 
+using DataFrames
+
+df = DataFrame(A = 1:4, B = ["M", "F", "F", "M"])
+
 x = Example(
     Dict(
         "a"=>Example(
@@ -81,6 +85,8 @@ x = Example(
         "set" => Set([1, 2, 3]),
         "set{any}" => Set(Any[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13]),
         "type" => Any,
+        "matrix" => rand(10, 10),
+        "dataframe" => df,
         "named_tuple" => (name="ABC", age=25),
         "nested" => Example(
             Dict(
@@ -104,3 +110,4 @@ pprint(x; compact=true)
 pprint(x; show_indent=false)
 
 pprint(IOContext(stdout, :color=>false), x)
+

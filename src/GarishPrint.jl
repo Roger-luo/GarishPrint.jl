@@ -144,7 +144,7 @@ PrintState() = PrintState(Unknown, false, 0, 0)
 - `bland_io::IO_t`: the original io.
 - `indent::Int`: indentation size.
 - `compact::Bool`: whether the printing should be compact.
-- `width::Int`: the terminal width.
+- `displaysize::Tuple{Int, Int}`: the terminal displaysize.
 - `show_indent`: print the indentation hint or not.
 - `color`: color preference, either `ColorPreference` or `nothing` for no color.
 - `state`: the state of the printer, see [`PrintState`](@ref).
@@ -154,14 +154,25 @@ struct GarishIO{IO_t <: IO} <: IO
     bland_io::IO_t
     indent::Int
     compact::Bool
-    width::Int
+    displaysize::Tuple{Int, Int}
     show_indent::Bool
     # use nothing for no color print
     color::Union{Nothing, ColorPreference}
     state::PrintState
 end
 
-_write(io::GarishIO, x) = write(IOContext(io.bland_io, :color=>isnothing(io.color), :compact=>io.compact), x)
+function wrap_io_context(io::GarishIO)
+    IOContext(
+        io.bland_io,
+        :color=>isnothing(io.color),
+        :compact=>io.compact,
+        :displaysize=>io.displaysize,
+    )
+end
+
+function _write(io::GarishIO, x)
+    write(wrap_io_context(io), x)
+end
 
 """
     within_nextlevel(f, io::GarishIO)
@@ -205,7 +216,7 @@ See [`pprint`](@ref) for available keywords.
 function GarishIO(io::IO; 
         indent::Int=2,
         compact::Bool=get(io, :compact, false),
-        width::Int=displaysize(io)[2],
+        displaysize::Tuple{Int, Int}=displaysize(io),
         show_indent::Bool=true,
         color::Bool=true,
         kw...
@@ -222,7 +233,7 @@ function GarishIO(io::IO;
         end
         color_prefs = nothing
     end
-    return GarishIO(io, indent, compact, width, show_indent, color_prefs, PrintState())
+    return GarishIO(io, indent, compact, displaysize, show_indent, color_prefs, PrintState())
 end
 
 """
@@ -245,7 +256,7 @@ function GarishIO(io::IO, garish_io::GarishIO;
     
     GarishIO(
         io, indent, compact,
-        garish_io.width,
+        garish_io.displaysize,
         garish_io.show_indent,
         color,
         garish_io.state
@@ -283,8 +294,8 @@ Pretty print given objects `xs` to `io`, default io is `stdout`.
 
 - `indent::Int`: indent size, default is `2`.
 - `compact::Bool`: whether print withint one line, default is `get(io, :compact, false)`.
-- `width::Int`: the width hint of printed string, note this is not stricted obeyed,
-default is displaysize(io)[2].
+- `displaysize::Tuple{Int, Int}`: the displaysize hint of printed string, note this is not stricted obeyed,
+default is displaysize(io).
 - `show_indent::Bool`: whether print indentation hint, default is `true`.
 - `color::Bool`: whether print with color, default is `true`.
 
@@ -353,23 +364,34 @@ function pprint(io::IO, mime::MIME, x; kw...)
 end
 
 function pprint(io::GarishIO, mime::MIME, @nospecialize(x))
-    isstructtype(typeof(x)) && return pprint_struct(io, mime, x)
-    # fallback to show unless it is a struct type
-    native_io = IOContext(
-        io.bland_io,
-        :color=>isnothing(io.color),
-        :compact=>io.compact,
-    )
-    return show(native_io, mime, x)
+    if fallback_to_default_show(io, x) && isstructtype(typeof(x))
+        return pprint_struct(io, mime, x)
+    elseif io.state.level > 0 # print show inside
+        show_text_within(io, mime, x)
+    else # fallback to show unless it is a struct type
+        show(wrap_io_context(io), mime, x)
+    end
+end
+
+function show_text_within(io::GarishIO, mime::MIME, x)
+    buf = IOBuffer()
+    indentation = io.indent * io.state.level + io.state.offset
+    new_displaysize = (io.displaysize[1], io.displaysize[2] - indentation)
+    buf_io = IOContext(IOContext(buf, wrap_io_context(io)), :limit=>true, :displaysize=>new_displaysize)
+    show(buf_io, mime, x)
+    raw = String(take!(buf))
+    for (k, line) in enumerate(split(raw, '\n'))
+        if !(io.state.noindent_in_first_line && k == 1)
+            print_indent(io)
+        end
+        println(io.bland_io, line)
+    end
+    print_indent(io) # force put a new line at the end
+    return
 end
 
 function pprint(io::GarishIO, mime::MIME, @specialize(x::Type))
-    native_io = IOContext(
-        io.bland_io,
-        :color=>isnothing(io.color),
-        :compact=>io.compact,
-    )
-    show(native_io, mime, x)
+    show(wrap_io_context(io), mime, x)
 end
 
 function pprint(io::GarishIO, mime::MIME"text/plain", @specialize(x::Type))
@@ -404,8 +426,26 @@ function print_operator(io::GarishIO, op)
 end
 
 function max_indent_reached(io::GarishIO, offset::Int)
-    io.indent * io.state.level + io.state.offset + offset > io.width
+    io.indent * io.state.level + io.state.offset + offset > io.displaysize[2]
 end
+
+function fallback_to_default_show(io::IO, x)
+    # NOTE: Base.show(::IO, ::MIME"text/plain", ::Any) forwards to
+    # Base.show(::IO, ::Any)
+
+    # check if we are gonna call Base.show(::IO, ::MIME"text/plain", ::Any)
+    mt = methods(Base.show, (typeof(io), MIME"text/plain", typeof(x)))
+    length(mt.ms) == 1 && any(mt.ms) do method
+        method.sig == Tuple{typeof(Base.show), IO, MIME"text/plain", Any}
+    end || return false
+
+    # check if we are gonna call Base.show(::IO, ::Any)
+    mt = methods(Base.show, (typeof(io), typeof(x)))
+    length(mt.ms) == 1 && return any(mt.ms) do method
+        method.sig == Tuple{typeof(Base.show), IO, Any}
+    end
+end
+
 
 include("struct.jl")
 include("numbers.jl")

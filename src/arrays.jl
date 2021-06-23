@@ -14,7 +14,12 @@ function pprint(io::GarishIO, ::MIME"text/plain", X::AbstractArray)
     # fallback to compact show for high dimensional arrays
     # since we cannot control the indent in multi-line printing
     # not implemented with pprint interface
-    return show(io, X)
+    if io.compact
+        return show(io, X)
+    else
+        return show_text_within(io, MIME"text/plain"(), X)
+    end
+    # return show(io, X)
 end
 
 # NOTE: modified based on base/arrayshow.jl:show_zero_dim
