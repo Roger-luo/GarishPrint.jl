@@ -81,6 +81,7 @@ x = Example(
         "set" => Set([1, 2, 3]),
         "set{any}" => Set(Any[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13]),
         "type" => Any,
+        "named_tuple" => (name="ABC", age=25),
         "nested" => Example(
             Dict(
                 "a"=>Example(
