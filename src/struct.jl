@@ -1,9 +1,21 @@
+pprint_struct(io::IO, ::MIME"text/plain", @nospecialize(x);kw...) = pprint_struct(io, x; kw...)
+pprint_struct(io::IO, @nospecialize(x); kw...) = pprint_struct(GarishIO(io; kw...), x)
+
 """
-    pprint_struct(io::GarishIO, ::MIME, x)
+    pprint_struct(io, ::MIME"text/plain", @nospecialize(x))
 
 Print `x` as a struct type.
 """
 function pprint_struct(io::GarishIO, ::MIME"text/plain", @nospecialize(x))
+    pprint_struct(io, x)
+end
+
+"""
+    pprint_struct(io::GarishIO, x)
+
+Print `x` as a struct type with mime type `MIME"text/plain"`.
+"""
+function pprint_struct(io::GarishIO, @nospecialize(x))
     t = typeof(x)
     print_token(io, :type, t); print(io.bland_io, "(")
 

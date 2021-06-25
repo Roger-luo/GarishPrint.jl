@@ -4,6 +4,7 @@ authors = ["Roger-Luo <rogerluo.rl18@gmail.com> and contributors"]
 version = "0.2.0"
 
 [deps]
+Configurations = "5218b696-f38b-4ac9-8b61-a12ec717816d"
 
 [compat]
 julia = "1"

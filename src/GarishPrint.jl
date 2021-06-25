@@ -1,6 +1,6 @@
 module GarishPrint
 
-export pprint
+export pprint, pprint_struct
 
 # 1.0 Compat
 @static if !@isdefined(isnothing)
