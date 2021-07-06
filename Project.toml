@@ -4,12 +4,12 @@ authors = ["Roger-Luo <rogerluo.rl18@gmail.com> and contributors"]
 version = "0.2.0"
 
 [deps]
-Configurations = "5218b696-f38b-4ac9-8b61-a12ec717816d"
 
 [compat]
 julia = "1"
 
 [extras]
+Configurations = "5218b696-f38b-4ac9-8b61-a12ec717816d"
 DataFrames = "a93c6f00-e57d-5684-b7b6-d8193f3e46c0"
 Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
 
