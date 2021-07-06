@@ -10,25 +10,7 @@ end
 include("color.jl")
 include("io.jl")
 
-"""
-    print_token(io::GarishIO, type::Symbol, xs...)
 
-Print `xs` to a `GarishIO` as given token type. The token type
-should match the field name of `ColorPreference`.
-"""
-function print_token(io::GarishIO, type::Symbol, xs...)
-    print_token(print, io, type, xs...)
-end
-
-"""
-    print_token(f, io::GarishIO, type::Symbol, xs...)
-
-Print `xs` to a `GarishIO` as given token type using `f(io, xs...)`
-"""
-function print_token(f, io::GarishIO, type::Symbol, xs...)
-    isnothing(io.color) && return f(io, xs...)
-    Base.with_output_color(f, getfield(io.color, type), io, xs...)
-end
 
 pprint(xs...; kw...) = pprint(stdout, xs...; kw...)
 
