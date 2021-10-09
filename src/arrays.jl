@@ -29,7 +29,7 @@ function pprint_zero_dim(io::GarishIO, X::AbstractArray{T, 0}) where T
         pprint(io, X[])
     else
         print_token(io, :type, "Array{", T, ", 0}(")
-        print_undef(io)
+        pprint(io, undef)
     end
     print(io, ")")
 end

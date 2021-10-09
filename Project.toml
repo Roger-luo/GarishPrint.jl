@@ -7,6 +7,7 @@ version = "0.2.1"
 
 [compat]
 julia = "1"
+Configurations = "0.16"
 
 [extras]
 Configurations = "5218b696-f38b-4ac9-8b61-a12ec717816d"

@@ -31,18 +31,41 @@ function pprint(io::GarishIO, ::MIME"text/plain", s::AbstractString)
     print_token(show, io, :string, s)
 end
 
-pprint(io::GarishIO, ::MIME"text/plain", ::UndefInitializer) = print_undef(io)
-pprint(io::GarishIO, ::MIME"text/plain", ::Nothing) = print_nothing(io)
-pprint(io::GarishIO, ::MIME"text/plain", ::Missing) = print_missing(io)
+function pprint(io::GarishIO, ::MIME"text/plain", ::UndefInitializer)
+    print_token(io, :undef, "undef")
+end
 
-function print_nothing(io::GarishIO)
+function pprint(io::GarishIO, ::MIME"text/plain", ::Nothing)
     print_token(io, :constant, "nothing")
 end
 
-function print_missing(io::GarishIO)
+function pprint(io::GarishIO, ::MIME"text/plain", ::Missing)
     print_token(io, :constant, "missing")
 end
 
-function print_undef(io::GarishIO)
-    print_token(io, :undef, "undef")
+"""
+    print_indent(io::GarishIO)
+
+Print an indentation. This should be only used under `MIME"text/plain"` or equivalent.
+"""
+function print_indent(io::GarishIO)
+    io.compact && return
+    io.state.level > 0 || return
+
+    io.show_indent || return print(io, " "^(io.indent * io.state.level))
+    for _ in 1:io.state.level
+        print_token(io, :comment, "│")
+        print(io, " "^(io.indent - 1))
+    end
+end
+
+"""
+    print_operator(io::GarishIO, op)
+
+Print an operator, such as `=`, `+`, `=>` etc. This should be only used under `MIME"text/plain"` or equivalent.
+"""
+function print_operator(io::GarishIO, op)
+    io.compact || print(io, " ")
+    print_token(io, :operator, op)
+    io.compact || print(io, " ")
 end
