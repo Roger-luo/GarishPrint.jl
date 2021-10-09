@@ -8,6 +8,7 @@ Configurations = "5218b696-f38b-4ac9-8b61-a12ec717816d"
 
 [compat]
 julia = "1"
+Configurations = "0.16"
 
 [extras]
 DataFrames = "a93c6f00-e57d-5684-b7b6-d8193f3e46c0"
