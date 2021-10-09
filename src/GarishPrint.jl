@@ -1,6 +1,7 @@
 module GarishPrint
 
 export pprint, pprint_struct
+using Configurations
 
 # 1.0 Compat
 @static if !@isdefined(isnothing)

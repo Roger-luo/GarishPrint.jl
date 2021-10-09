@@ -25,16 +25,27 @@ function show_text_within(io::GarishIO, mime::MIME, x)
     indentation = io.indent * io.state.level + io.state.offset
     new_displaysize = (io.displaysize[1], io.displaysize[2] - indentation)
     
-    buf_io = GarishIO(buf, io; limit=true, displaysize=new_displaysize)
+    buf_io = GarishIO(buf, io;  limit=true, displaysize=new_displaysize, state=PrintState())
     show(buf_io, mime, x)
     raw = String(take!(buf))
-    for (k, line) in enumerate(split(raw, '\n'))
+    buf_lines = split(raw, '\n')
+    for k in 1:length(buf_lines)-1
+        line = buf_lines[k]
         if !(io.state.noindent_in_first_line && k == 1)
             print_indent(io)
         end
         println(io.bland_io, line)
     end
-    print_indent(io) # force put a new line at the end
+
+    # pretty print last line
+    last_line = buf_lines[end]
+    length(buf_lines) == 1 || print_indent(io)
+    if endswith(last_line, ')')
+        print(io.bland_io, last_line)
+    else
+        println(io.bland_io, last_line)
+        print_indent(io) # force put a new line at the end
+    end
     return
 end
 

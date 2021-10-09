@@ -45,6 +45,8 @@ struct GarishIO{IO_t <: IO} <: Base.AbstractPipe
     limit::Bool
     displaysize::Tuple{Int, Int}
     show_indent::Bool
+    # option type
+    include_defaults::Bool
     # use nothing for no color print
     color::Union{Nothing, ColorPreference}
     state::PrintState
@@ -63,6 +65,7 @@ function GarishIO(io::IO;
         color::Bool=get(io, :color, true),
         # indent is similar to color
         show_indent::Bool=get(io, :color, true),
+        include_defaults::Bool=get(io, :include_defaults, false),
         kw...
     )
 
@@ -75,17 +78,20 @@ function GarishIO(io::IO;
         io, indent,
         compact, limit,
         displaysize,
-        show_indent, color_prefs,
+        show_indent,
+        include_defaults,
+        color_prefs,
         PrintState()
     )
 end
 
 function GarishIO(io::GarishIO;
     indent::Int=io.indent,
-    compact=io.compact,
-    limit=io.limit,
-    displaysize=io.displaysize,
-    show_indent=io.show_indent,
+    compact::Bool=io.compact,
+    limit::Bool=io.limit,
+    displaysize::Tuple{Int, Int}=io.displaysize,
+    show_indent::Bool=io.show_indent,
+    include_defaults::Bool=get(io, :include_defaults, false),
     color=io.color,
     state=io.state,
     kw...)
@@ -98,7 +104,10 @@ function GarishIO(io::GarishIO;
 
     return GarishIO(
         io, indent, compact, limit,
-        displaysize, show_indent, color_prefs, state
+        displaysize, show_indent,
+        include_defaults,
+        color_prefs,
+        state
     )
 end
 
@@ -116,7 +125,9 @@ function GarishIO(io::IO, garish_io::GarishIO;
         limit::Bool=garish_io.limit,
         displaysize::Tuple{Int, Int}=garish_io.displaysize,
         show_indent::Bool=garish_io.show_indent,
+        include_defaults::Bool=get(io, :include_defaults, false),
         color_prefs=garish_io.color,
+        state=garish_io.state
     )
 
     if haskey(io, :color) && io[:color] == false
@@ -129,8 +140,10 @@ function GarishIO(io::IO, garish_io::GarishIO;
         io, indent,
         compact, limit,
         displaysize,
-        show_indent, color_prefs,
-        garish_io.state,
+        show_indent,
+        include_defaults,
+        color_prefs,
+        state,
     )
 end
 
@@ -151,6 +164,7 @@ function Base.IOContext(io::GarishIO, KVs::Pair...)
         :pprint_indent=>io.indent,
         :color_preference=>io.color,
         :show_indent=>io.show_indent,
+        :include_defaults=>io.include_defaults,
         :pprint_type=>io.state.type,
         :pprint_level=>io.state.level,
         :pprint_offset=>io.state.offset,
