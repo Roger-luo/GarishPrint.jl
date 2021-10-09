@@ -1,9 +1,11 @@
+pprint_struct(@nospecialize(x); kw...) = pprint_struct(stdout, x; kw...)
+
 function pprint_struct(io::IO, @nospecialize(x); kw...)
     pprint_struct(GarishIO(io; kw...), x)
 end
 
 function pprint_struct(io::GarishIO, @nospecialize(x))
-    pprint_struct(io::GarishIO, MIME"text/plain"(), @nospecialize(x))
+    pprint_struct(io, MIME"text/plain"(), x)
 end
 
 """

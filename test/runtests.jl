@@ -110,3 +110,47 @@ pprint(x; show_indent=false)
 
 pprint(IOContext(stdout, :color=>false), x)
 
+using GarishPrint
+using Configurations
+
+
+struct OptionA
+    a::Int
+    b::Int
+end
+
+struct OptionB
+    a::Vector{Int}
+    b::OptionA
+end
+
+Base.show(io::IO, x::OptionA) = GarishPrint.pprint_struct(io, x)
+Base.show(io::IO, x::OptionB) = GarishPrint.pprint_struct(io, x)
+
+opt = OptionB([1, 2, 3], OptionA(2, 2))
+pprint_struct(opt)
+
+@option "geometry" struct Geometry
+    L::Int
+    graph::Int
+    radius::Float64 = 1.5
+end
+
+@option "emulation" struct Emulation
+    pulse::String
+    algo::String # = "Vern8"
+    precision::String # = "float32"
+    reltol::Maybe{Float64} = nothing
+    abstol::Maybe{Float64} = nothing
+    dt::Maybe{Float64} = nothing
+    total_time::Vector{Int} = collect(1:7)
+    postprocess::Bool = false
+    gen_subspace::Bool = false
+    geometry::Geometry
+end
+
+Base.show(io::IO, x::Geometry) = GarishPrint.pprint_struct(io, x)
+Base.show(io::IO, x::Emulation) = GarishPrint.pprint_struct(io, x)
+
+opt = Emulation(;pulse="linear", algo="Vern8", precision="float32", geometry=Geometry(8, 188, 1.5))
+opt
