@@ -1,3 +1,14 @@
+"""
+    pprint_struct([io::IO=stdout], [mimetype], x; kw...)
+
+Pretty print object `x` that is a struct type (`isstructtype` returns `true`).
+
+# Keyword Arguments
+
+See [`pprint`](@ref), they share the same keyword arguments.
+"""
+function pprint_struct end
+
 pprint_struct(@nospecialize(x); kw...) = pprint_struct(stdout, x; kw...)
 
 function pprint_struct(io::IO, @nospecialize(x);kw...)
@@ -15,6 +26,7 @@ Print `x` as a struct type with mime type `MIME"text/plain"`.
 """
 function pprint_struct(io::GarishIO, mime::MIME"text/plain", @nospecialize(x))
     t = typeof(x)
+    isstructtype(t) || throw(ArgumentError("expect a struct type, got $t"))
     print_token(io, :type, t); print(io.bland_io, "(")
 
     nf = nfields(x)::Int
