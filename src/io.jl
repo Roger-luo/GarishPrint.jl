@@ -60,8 +60,9 @@ function GarishIO(io::IO;
         compact::Bool=get(io, :compact, false),
         limit::Bool=get(io, :limit, false),
         displaysize::Tuple{Int, Int}=displaysize(io),
-        show_indent::Bool=true,
-        color::Bool=true,
+        color::Bool=get(io, :color, true),
+        # indent is similar to color
+        show_indent::Bool=get(io, :color, true),
         kw...
     )
 
@@ -79,6 +80,28 @@ function GarishIO(io::IO;
     )
 end
 
+function GarishIO(io::GarishIO;
+    indent::Int=io.indent,
+    compact=io.compact,
+    limit=io.limit,
+    displaysize=io.displaysize,
+    show_indent=io.show_indent,
+    color=io.color,
+    state=io.state,
+    kw...)
+
+    if isempty(kw)
+        color_prefs = color
+    else
+        color_prefs = ColorPreference(;kw...)
+    end
+
+    return GarishIO(
+        io, indent, compact, limit,
+        displaysize, show_indent, color_prefs, state
+    )
+end
+
 """
     GarishIO(io::IO, garish_io::GarishIO; kw...)
 
@@ -89,11 +112,11 @@ keyword arguments.
 """
 function GarishIO(io::IO, garish_io::GarishIO;
         indent::Int=garish_io.indent,
-        compact::Bool=io.compact,
-        limit::Bool=io.limit,
-        displaysize::Tuple{Int, Int}=io.displaysize,
-        show_indent::Bool=io.show_indent,
-        color_prefs=io.color,
+        compact::Bool=garish_io.compact,
+        limit::Bool=garish_io.limit,
+        displaysize::Tuple{Int, Int}=garish_io.displaysize,
+        show_indent::Bool=garish_io.show_indent,
+        color_prefs=garish_io.color,
     )
 
     if haskey(io, :color) && io[:color] == false
@@ -165,8 +188,6 @@ function within_nextlevel(f, io::GarishIO)
     return ret
 end
 
-
-
 """
     print_token(io::GarishIO, type::Symbol, xs...)
 
@@ -185,4 +206,8 @@ Print `xs` to a `GarishIO` as given token type using `f(io, xs...)`
 function print_token(f, io::GarishIO, type::Symbol, xs...)
     isnothing(io.color) && return f(io, xs...)
     Base.with_output_color(f, getfield(io.color, type), io, xs...)
+end
+
+function max_indent_reached(io::GarishIO, offset::Int)
+    io.indent * io.state.level + io.state.offset + offset > io.displaysize[2]
 end

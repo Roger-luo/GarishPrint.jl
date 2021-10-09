@@ -1,21 +1,17 @@
-pprint_struct(io::IO, ::MIME"text/plain", @nospecialize(x);kw...) = pprint_struct(io, x; kw...)
-pprint_struct(io::IO, @nospecialize(x); kw...) = pprint_struct(GarishIO(io; kw...), x)
+function pprint_struct(io::IO, @nospecialize(x); kw...)
+    pprint_struct(GarishIO(io; kw...), x)
+end
+
+function pprint_struct(io::GarishIO, @nospecialize(x))
+    pprint_struct(io::GarishIO, MIME"text/plain"(), @nospecialize(x))
+end
 
 """
     pprint_struct(io, ::MIME"text/plain", @nospecialize(x))
 
-Print `x` as a struct type.
-"""
-function pprint_struct(io::GarishIO, ::MIME"text/plain", @nospecialize(x))
-    pprint_struct(io, x)
-end
-
-"""
-    pprint_struct(io::GarishIO, x)
-
 Print `x` as a struct type with mime type `MIME"text/plain"`.
 """
-function pprint_struct(io::GarishIO, @nospecialize(x))
+function pprint_struct(io::GarishIO, mime::MIME"text/plain", @nospecialize(x))
     t = typeof(x)
     print_token(io, :type, t); print(io.bland_io, "(")
 
@@ -40,10 +36,10 @@ function pprint_struct(io::GarishIO, @nospecialize(x))
             end
 
             if !isdefined(x, f) # print undef as comment color
-                print_undef(io)
+                pprint(io, undef)
             else
-                new_io = GarishIO(IOContext(io.bland_io, :limit=>true), io)
-                pprint_field(new_io, getfield(x, i))
+                new_io = GarishIO(io; limit=true)
+                pprint_field(new_io, mime, getfield(x, i))
             end
 
             if !io.compact || i < nf
@@ -62,12 +58,12 @@ end
 
 pprint_field(io::GarishIO, x) = pprint_field(io, MIME"text/plain"(), x)
 
-function pprint_field(io::GarishIO, ::MIME"text/plain", x)
+function pprint_field(io::GarishIO, mime::MIME"text/plain", x)
     upperlevel_type = io.state.type
     upperlevel_noindent_in_first_line = io.state.noindent_in_first_line
     io.state.type = StructField
     io.state.noindent_in_first_line = true
-    pprint(io, x)
+    pprint(io, mime, x)
     io.state.noindent_in_first_line = upperlevel_noindent_in_first_line
     io.state.type = upperlevel_type
 end
