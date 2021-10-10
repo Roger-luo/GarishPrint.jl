@@ -1,4 +1,8 @@
 function pprint(io::GarishIO, ::MIME"text/plain", d::AbstractDict)
-    # NOTE: unlike Vector, we only do compact print when it's turned on
-    pprint_list_like(io, d, "(", ")")
+    # heurostics to print Dict in compact form
+    if length(d) < 20 && !max_indent_reached(io, length(string(d)))
+        pprint_list_like(io, d, "(", ")"; compact=true)
+    else
+        pprint_list_like(io, d, "(", ")")
+    end
 end
