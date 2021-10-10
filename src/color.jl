@@ -50,15 +50,45 @@ struct ColorPreference
     linenumber::ColorType
 end
 
+struct PreferenceInvalid <: Exception
+    key::String
+    type
+    got
+end
+
+function Base.showerror(io::IO, x::PreferenceInvalid)
+    print(io, "preference for ")
+    printstyled(io, x.key; color=:light_blue)
+    print(io, " is invalid, expect ")
+    printstyled(io, x.type; color=:green)
+    print(io, " got: ", repr(x.got))
+end
+
+Base.show(io::IO, x::ColorPreference) = pprint_struct(io, x)
+
 """
     ColorPreference(;kw...)
 
 See [`pprint`](@ref) for available keyword configurations.
 """
 function ColorPreference(;kw...)
-    default = supports_color256() ? default_colors_256() : default_colors_ansi()
-    colors = merge(default, kw)
-    return ColorPreference([colors[name] for name in fieldnames(ColorPreference)]...)
+    colors = supports_color256() ? default_colors_256() : default_colors_ansi()
+    if color_prefs_toml !== nothing
+        merge!(colors, color_prefs_toml)
+    end
+    colors = merge!(colors, kw)
+
+    args = map(fieldnames(ColorPreference)) do name
+        val = colors[string(name)]
+        if val isa String
+            return Symbol(val)
+        elseif val isa Int
+            return val
+        else
+            throw(PreferenceInvalid("GarishPrint.color.$name", Union{String, Int}, val))
+        end
+    end
+    return ColorPreference(args...)
 end
 
 """
@@ -67,17 +97,17 @@ end
 The default ANSI color theme.
 """
 function default_colors_ansi()
-    Dict(
-        :fieldname => :light_blue,
-        :type => :green,
-        :operator => :normal,
-        :literal => :yellow,
-        :constant => :yellow,
-        :number => :normal,
-        :string => :yellow,
-        :comment => :light_black,
-        :undef => :normal,
-        :linenumber => :light_black,
+    Dict{String, Any}(
+        "fieldname" => "light_blue",
+        "type" => "green",
+        "operator" => "normal",
+        "literal" => "yellow",
+        "constant" => "yellow",
+        "number" => "normal",
+        "string" => "yellow",
+        "comment" => "light_black",
+        "undef" => "normal",
+        "linenumber" => "light_black",
     )
 end
 
@@ -87,17 +117,17 @@ end
 The default color 256 theme.
 """
 function default_colors_256()
-    Dict(
-        :fieldname => 039,
-        :type => 037,
-        :operator => 196,
-        :literal => 140,
-        :constant => 099,
-        :number => 140,
-        :string => 180,
-        :comment => 240,
+    Dict{String, Any}(
+        "fieldname" => 039,
+        "type" => 037,
+        "operator" => 196,
+        "literal" => 140,
+        "constant" => 099,
+        "number" => 140,
+        "string" => 180,
+        "comment" => 240,
         # undef is actually a constant
-        :undef => 099,
-        :linenumber => 240,
+        "undef" => 099,
+        "linenumber" => 240,
     )
 end

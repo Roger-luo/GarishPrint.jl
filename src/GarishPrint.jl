@@ -8,6 +8,13 @@ using Configurations
     isnothing(x) = x === nothing
 end
 
+@static if VERSION ≥ v"1.6"
+    using Preferences
+    const color_prefs_toml = @load_preference("color")
+else
+    const color_prefs_toml = nothing
+end
+
 include("color.jl")
 include("io.jl")
 include("pprint.jl")
