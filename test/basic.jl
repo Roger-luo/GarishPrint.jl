@@ -45,6 +45,7 @@ pprint(T5(π))
 
 pprint(T5(rand(100)))
 pprint(T5(Dict(1=>2)))
+pprint(T5(Dict()))
 pprint(T5(π))
 pprint(T5(ℯ))
 pprint(T5(fill(π)))
