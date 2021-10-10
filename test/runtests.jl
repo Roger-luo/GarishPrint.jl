@@ -6,7 +6,7 @@ using Test
     end
 end
 
-@testset "colors"
+@testset "colors" begin
     include("colors.jl")
 end
 

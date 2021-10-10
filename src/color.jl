@@ -78,6 +78,7 @@ function Configurations.convert_to_option(::Type{ColorScheme}, ::Type{Crayon}, x
 end
 
 function Configurations.convert_to_option(::Type{ColorScheme}, ::Type{Crayon}, d::Dict)
+    @show d
     kwargs = []
     if haskey(d, "foreground")
         push!(kwargs, :foreground => parse_color(d["foreground"]))
