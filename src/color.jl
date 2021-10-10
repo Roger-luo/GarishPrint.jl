@@ -68,6 +68,26 @@ const semantic_colornames = [
     "white"
 ]
 
+const COLORS = Dict(
+     0 => "black",
+     1 => "red",
+     2 => "green",
+     3 => "yellow",
+     4 => "blue",
+     5 => "magenta",
+     6 => "cyan",
+     7 => "light_gray",
+     9 => "default",
+    60 => "dark_gray",
+    61 => "light_red",
+    62 => "light_green",
+    63 => "light_yellow",
+    64 => "light_blue",
+    65 => "light_magenta",
+    66 => "light_cyan",
+    67 => "white" 
+)
+
 for name in semantic_colornames
     semantic_crayons[Crayon(foreground = Symbol(name))] = name
 end
@@ -132,6 +152,8 @@ function Configurations.to_dict(::Type{ColorScheme}, x::Crayon)
     end
 end
 
+parse_color(s::String) = Symbol(s)
+
 function parse_color(d::Dict)
     haskey(d, "style") || error("field `style` is required for color")
     haskey(d, "color") || error("field `color` is required for color")
@@ -147,7 +169,7 @@ end
 
 function ansi_color_to_dict(x::Crayons.ANSIColor)
     if x.style == Crayons.COLORS_16
-        # TODO: lower to Symbol then String
+        return COLORS[x.r]
     elseif x.style == Crayons.COLORS_256
         Dict{String, Any}(
             "color" => x.r,
@@ -174,7 +196,6 @@ Base.show(io::IO, x::ColorScheme) = pprint_struct(io, x)
 function color_scheme(;kw...)
     colors = supports_color256() ? monokai_256() : monokai()
     d = to_dict(colors, TOMLStyle)
-    @show d
     if color_prefs_toml !== nothing
         merge!(d, color_prefs_toml)
     end
