@@ -1,7 +1,7 @@
 name = "GarishPrint"
 uuid = "b0ab02a7-8576-43f7-aa76-eaa7c3897c54"
 authors = ["Roger-Luo <rogerluo.rl18@gmail.com> and contributors"]
-version = "0.3.0"
+version = "0.4.0"
 
 [deps]
 Configurations = "5218b696-f38b-4ac9-8b61-a12ec717816d"
@@ -10,8 +10,8 @@ Preferences = "21216c6a-2e73-6563-6e65-726566657250"
 
 [compat]
 Configurations = "0.16"
-Preferences = "1"
 Crayons = "4"
+Preferences = "1"
 julia = "1"
 
 [extras]
