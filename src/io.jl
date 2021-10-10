@@ -63,17 +63,17 @@ function GarishIO(io::IO;
         limit::Bool=get(io, :limit, false),
         displaysize::Tuple{Int, Int}=displaysize(io),
         color::Bool=get(io, :color, true),
+        color_prefs::Union{Nothing, ColorScheme} = nothing,
         # indent is similar to color
         show_indent::Bool=get(io, :color, true),
         include_defaults::Bool=get(io, :include_defaults, false),
         kw...
     )
 
-    if color
+    if color && color_prefs === nothing
         color_prefs = color_scheme(;kw...)
-    else
-        color_prefs = nothing
     end
+
     return GarishIO(
         io, indent,
         compact, limit,
