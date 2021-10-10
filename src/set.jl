@@ -1,4 +1,7 @@
 function pprint(io::GarishIO, ::MIME"text/plain", s::Set)
+    # use default printing if it's the root
+    io.state.level == 0 && return show(io, mime, d)
+
     if isempty(s)
         if get(io, :typeinfo, Any) == typeof(s)
             print_token(io, :type, "Set")

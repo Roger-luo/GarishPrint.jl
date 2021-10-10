@@ -1,4 +1,6 @@
-function pprint(io::GarishIO, ::MIME"text/plain", X::AbstractArray)
+function pprint(io::GarishIO, mime::MIME"text/plain", X::AbstractArray)
+    # use default array printing if it's the root
+    io.state.level == 0 && return show(io, mime, X)
     ndims(X) == 0 && return pprint_zero_dim(io, X)
 
     if ndims(X) == 1
