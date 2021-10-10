@@ -86,7 +86,7 @@ function show_text_within(io::GarishIO, mime::MIME, x)
     buf = IOBuffer()
     indentation = io.indent * io.state.level + io.state.offset
     new_displaysize = (io.displaysize[1], io.displaysize[2] - indentation)
-    
+
     buf_io = GarishIO(buf, io;  limit=true, displaysize=new_displaysize, state=PrintState())
     show(buf_io, mime, x)
     raw = String(take!(buf))
@@ -105,8 +105,11 @@ function show_text_within(io::GarishIO, mime::MIME, x)
     if endswith(last_line, ')')
         print(io.bland_io, last_line)
     else
-        println(io.bland_io, last_line)
-        print_indent(io) # force put a new line at the end
+        print(io.bland_io, last_line)
+        if length(buf_lines) > 1
+            println(io)
+            print_indent(io) # force put a new line at the end
+        end
     end
     return
 end

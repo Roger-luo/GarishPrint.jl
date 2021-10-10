@@ -1,22 +1,7 @@
-name = "GarishPrint"
-uuid = "b0ab02a7-8576-43f7-aa76-eaa7c3897c54"
-authors = ["Roger-Luo <rogerluo.rl18@gmail.com> and contributors"]
-version = "0.2.1"
-
 [deps]
 Configurations = "5218b696-f38b-4ac9-8b61-a12ec717816d"
 Preferences = "21216c6a-2e73-6563-6e65-726566657250"
-
-[compat]
-Configurations = "0.16"
-Preferences = "1"
-julia = "1"
-
-[extras]
 DataFrames = "a93c6f00-e57d-5684-b7b6-d8193f3e46c0"
 TOML = "fa267f1f-6049-4f14-aa54-33bafae1ed76"
 UUIDs = "cf7118a7-6976-5b1a-9a39-7adc72f591a4"
 Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
-
-[targets]
-test = ["Test", "TOML", "DataFrames"]
