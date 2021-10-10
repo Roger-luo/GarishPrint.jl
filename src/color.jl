@@ -169,15 +169,16 @@ function rgb_to_hex(r, g, b)
     return uppercase(string(hex; base=16))
 end
 
-# Base.show(io::IO, x::ColorScheme) = pprint_struct(io, x)
+Base.show(io::IO, x::ColorScheme) = pprint_struct(io, x)
 
 function color_scheme(;kw...)
     colors = supports_color256() ? monokai_256() : monokai()
     d = to_dict(colors, TOMLStyle)
+    @show d
     if color_prefs_toml !== nothing
         merge!(d, color_prefs_toml)
     end
-    
+
     if !isempty(kw)
         merge!(d, kw)
     end
