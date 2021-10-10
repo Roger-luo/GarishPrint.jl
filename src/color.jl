@@ -26,108 +26,160 @@ function supports_color256()
     end
 end
 
-const ColorType = Union{Int, Symbol}
+# NOTE: this type immutable because each object maps to
+# an preference file, thus it shouldn't be changed once
+# created
 
 """
-    ColorPreference
+    ColorScheme
 
-The color preference type.
+The color scheme type.
 """
-struct ColorPreference
-    fieldname::ColorType
-    type::ColorType
-    operator::ColorType
-    
+@option struct ColorScheme
+    # struct components
+    fieldname::Crayon
+    type::Crayon
+
+    # keyword-like
+    keyword::Crayon
+    call::Crayon
+
     # literal-like
-    literal::ColorType
-    constant::ColorType
-    number::ColorType
-    string::ColorType
+    text::Crayon
+    number::Crayon
+    string::Crayon
+    symbol::Crayon
+    literal::Crayon
+    constant::Crayon
+    op::Crayon
 
     # comment-like
-    comment::ColorType
-    undef::ColorType
-    linenumber::ColorType
+    comment::Crayon
+    undef::Crayon
+    lineno::Crayon
 end
 
-struct PreferenceInvalid <: Exception
-    key::String
-    type
-    got
+# fancy color names
+const semantic_crayons = Dict{Crayon, String}()
+const semantic_colornames = [
+    "default", "black", "blue",
+    "cyan", "green", "light_blue", "light_cyan", "light_green",
+    "light_magenta", "light_red", "light_yellow", "magenta", "nothing", "red",
+    "white"
+]
+
+for name in semantic_colornames
+    semantic_crayons[Crayon(foreground = Symbol(name))] = name
 end
 
-function Base.showerror(io::IO, x::PreferenceInvalid)
-    print(io, "preference for ")
-    printstyled(io, x.key; color=:light_blue)
-    print(io, " is invalid, expect ")
-    printstyled(io, x.type; color=:green)
-    print(io, " got: ", repr(x.got))
+function Configurations.convert_to_option(::Type{ColorScheme}, ::Type{Crayon}, x::String)
+    x in semantic_colornames || throw(ArgumentError("invalid color $x"))
+    return Crayon(foreground = Symbol(x))
 end
 
-Base.show(io::IO, x::ColorPreference) = pprint_struct(io, x)
-
-"""
-    ColorPreference(;kw...)
-
-See [`pprint`](@ref) for available keyword configurations.
-"""
-function ColorPreference(;kw...)
-    colors = supports_color256() ? default_colors_256() : default_colors_ansi()
-    if color_prefs_toml !== nothing
-        merge!(colors, color_prefs_toml)
+function Configurations.convert_to_option(::Type{ColorScheme}, ::Type{Crayon}, d::Dict)
+    kwargs = []
+    if haskey(d, "foreground")
+        push!(kwargs, :foreground => parse_color(d["foreground"]))
     end
-    colors = merge!(colors, kw)
 
-    args = map(fieldnames(ColorPreference)) do name
-        val = colors[string(name)]
-        if val isa String
-            return Symbol(val)
-        elseif val isa Int
-            return val
-        else
-            throw(PreferenceInvalid("GarishPrint.color.$name", Union{String, Int}, val))
+    if haskey(d, "background")
+        push!(kwargs, :background => parse_color(d["background"]))
+    end
+
+    for key in [
+            :reset,
+            :bold,
+            :faint,
+            :italics,
+            :underline,
+            :blink,
+            :negative,
+            :conceal,
+            :strikethrough,
+        ]
+
+        if get(d, string(key), false)
+            push!(kwargs, key => true)
         end
     end
-    return ColorPreference(args...)
+    return Crayon(;kwargs...)
 end
 
-"""
-    default_colors_ansi()
+function Configurations.to_dict(::Type{ColorScheme}, x::Crayon)
+    if haskey(semantic_crayons, x)
+        return semantic_crayons[x]
+    else
+        d = Dict{String, Any}()
+        if x.fg.active
+            d["foreground"] = ansi_color_to_dict(x.fg)
+        end
 
-The default ANSI color theme.
-"""
-function default_colors_ansi()
-    Dict{String, Any}(
-        "fieldname" => "light_blue",
-        "type" => "green",
-        "operator" => "normal",
-        "literal" => "yellow",
-        "constant" => "yellow",
-        "number" => "normal",
-        "string" => "yellow",
-        "comment" => "light_black",
-        "undef" => "normal",
-        "linenumber" => "light_black",
-    )
+        if x.bg.active
+            d["background"] = ansi_color_to_dict(x.bg)
+        end
+
+        for f in fieldnames(Crayon)
+            if f === :fg || f === :bg
+                continue
+            end
+
+            if getfield(x, f).active
+                d[string(each)] = true
+            end
+        end
+        return d
+    end
 end
 
-"""
-    default_colors_256()
+function parse_color(d::Dict)
+    haskey(d, "style") || error("field `style` is required for color")
+    haskey(d, "color") || error("field `color` is required for color")
 
-The default color 256 theme.
-"""
-function default_colors_256()
-    Dict{String, Any}(
-        "fieldname" => 039,
-        "type" => 037,
-        "operator" => 196,
-        "literal" => 140,
-        "constant" => 099,
-        "number" => 140,
-        "string" => 180,
-        "comment" => 240,
-        # undef is actually a constant
-        "undef" => 099,
-        "linenumber" => 240,
-    )
+    if d["style"] == "256"
+        return Int(d["color"])
+    elseif d["style"] == "24bit"
+        return parse(UInt32, "0x" * d["color"])
+    else
+        error("invalid style: $(d["style"])")
+    end
+end
+
+function ansi_color_to_dict(x::Crayons.ANSIColor)
+    if x.style == Crayons.COLORS_16
+        # TODO: lower to Symbol then String
+    elseif x.style == Crayons.COLORS_256
+        Dict{String, Any}(
+            "color" => x.r,
+            "style" => "256",
+        )
+    elseif x.style == Crayons.COLORS_24BIT
+        Dict{String, Any}(
+            "color" => rgb_to_hex(x.r, x.g, x.b),
+            "style" => "24bit",
+        )
+    else
+        error("invalid color encoding RESET")
+    end
+end
+
+function rgb_to_hex(r, g, b)
+    r, g, b = UInt32(r), UInt32(g), UInt32(b)
+    hex = r << 16 | g << 8 | b
+    return uppercase(string(hex; base=16))
+end
+
+# Base.show(io::IO, x::ColorScheme) = pprint_struct(io, x)
+
+function color_scheme(;kw...)
+    colors = supports_color256() ? monokai_256() : monokai()
+    d = to_dict(colors)
+    if color_prefs_toml !== nothing
+        merge!(d, color_prefs_toml)
+    end
+    
+    if !isempty(kw)
+        merge!(d, kw)
+    end
+    return from_dict(ColorScheme, d)
 end
