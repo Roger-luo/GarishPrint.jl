@@ -174,7 +174,7 @@ end
 
 function color_scheme(;kw...)
     colors = supports_color256() ? monokai_256() : monokai()
-    d = to_dict(colors)
+    d = to_dict(colors, TOMLStyle)
     if color_prefs_toml !== nothing
         merge!(d, color_prefs_toml)
     end
