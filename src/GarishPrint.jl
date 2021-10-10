@@ -10,6 +10,9 @@ end
 
 @static if VERSION ≥ v"1.6"
     using Preferences
+end
+
+@static if VERSION ≥ v"1.6"
     const color_prefs_toml = @load_preference("color")
 else
     const color_prefs_toml = nothing
