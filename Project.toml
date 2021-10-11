@@ -10,7 +10,6 @@ Preferences = "21216c6a-2e73-6563-6e65-726566657250"
 
 [compat]
 Configurations = "0.16"
-Crayons = "4"
 Preferences = "1"
 julia = "1"
 
