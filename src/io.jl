@@ -67,11 +67,10 @@ function GarishIO(io::IO;
         # indent is similar to color
         show_indent::Bool=get(io, :color, true),
         include_defaults::Bool=get(io, :include_defaults, false),
-        kw...
     )
 
     if color && color_prefs === nothing
-        color_prefs = color_scheme(;kw...)
+        color_prefs = COLOR_SCHEME
     end
 
     return GarishIO(
@@ -93,20 +92,14 @@ function GarishIO(io::GarishIO;
     show_indent::Bool=io.show_indent,
     include_defaults::Bool=get(io, :include_defaults, false),
     color=io.color,
-    state=io.state,
-    kw...)
-
-    if isempty(kw)
-        color_prefs = color
-    else
-        color_prefs = color_scheme(;kw...)
-    end
+    state=io.state
+    )
 
     return GarishIO(
         io, indent, compact, limit,
         displaysize, show_indent,
         include_defaults,
-        color_prefs,
+        io.color,
         state
     )
 end
@@ -217,14 +210,14 @@ end
 
 Print `xs` to a `GarishIO` as given token type using `f(io, xs...)`
 """
-function print_token(f, io::GarishIO, type::Symbol, xs...)
+function print_token(@nospecialize(f), io::GarishIO, type::Symbol, @nospecialize(xs...))
     isnothing(io.color) && return f(io, xs...)
     # workaround :color option
     get(io, :color, false) || return f(io, xs...)
     crayon = getfield(io.color, type)
     # Base.with_output_color
     buf = IOBuffer()
-    try f(GarishIO(buf, io), xs...)
+    try f(buf, xs...)
     finally
         str = String(take!(buf))
         return f(io, crayon(str))

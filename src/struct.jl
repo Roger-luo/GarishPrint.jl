@@ -38,17 +38,7 @@ function pprint_struct(io::GarishIO, mime::MIME"text/plain", @nospecialize(x))
 
     io.compact || println(io.bland_io)
 
-    # findout fields to print
-    fields_to_print = Int[]
-    for i in 1:nf
-        f = fieldname(t, i)
-        value = getfield(x, i)
-        if !io.include_defaults && is_option(x) && value == field_default(t, f)
-        else
-            push!(fields_to_print, i)
-        end
-    end
-
+    fields_to_print = _fields_to_print(x, io.include_defaults)
     within_nextlevel(io) do
         for i in fields_to_print
             f = fieldname(t, i)
@@ -83,9 +73,24 @@ function pprint_struct(io::GarishIO, mime::MIME"text/plain", @nospecialize(x))
     print(io.bland_io, ")")
 end
 
-pprint_field(io::GarishIO, x) = pprint_field(io, MIME"text/plain"(), x)
+function _fields_to_print(@nospecialize(x), include_defaults::Bool)
+    t = typeof(x)
+    nf = nfields(x)::Int
+    ret = Int[]
+    for i in 1:nf
+        f = fieldname(t, i)
+        value = getfield(x, i)
+        if !include_defaults && is_option(x) && value == field_default(t, f)
+        else
+            push!(ret, i)
+        end
+    end
+    return ret
+end
 
-function pprint_field(io::GarishIO, mime::MIME"text/plain", x)
+pprint_field(io::GarishIO, @nospecialize(x)) = pprint_field(io, MIME"text/plain"(), x)
+
+function pprint_field(io::GarishIO, mime::MIME"text/plain", @nospecialize(x))
     upperlevel_type = io.state.type
     upperlevel_noindent_in_first_line = io.state.noindent_in_first_line
     io.state.type = StructField
