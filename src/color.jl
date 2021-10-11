@@ -193,15 +193,13 @@ end
 
 Base.show(io::IO, x::ColorScheme) = pprint_struct(io, x)
 
-function color_scheme(;kw...)
+function color_scheme()
     colors = supports_color256() ? monokai_256() : monokai()
-    d = to_dict(colors, TOMLStyle)
     if color_prefs_toml !== nothing
+        d = to_dict(colors, TOMLStyle)
         merge!(d, color_prefs_toml)
+        return from_dict(ColorScheme, d)
+    else
+        return colors
     end
-
-    if !isempty(kw)
-        merge!(d, kw)
-    end
-    return from_dict(ColorScheme, d)
 end

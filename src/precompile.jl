@@ -15,17 +15,6 @@ end
 
 function _precompile_()
     ccall(:jl_generating_output, Cint, ()) == 1 || return nothing
-    isdefined(GarishPrint, Symbol("##pprint#8")) && precompile(Tuple{GarishPrint.var"##pprint#8", Base.Pairs{Symbol, Union{}, Tuple{}, NamedTuple{(), Tuple{}}}, typeof(GarishPrint.pprint), GarishPrint.GarishIO{Base.IOContext{Base.GenericIOBuffer{Array{UInt8, 1}}}}, Int64})
-    isdefined(GarishPrint, Symbol("##pprint#8")) && precompile(Tuple{GarishPrint.var"##pprint#8", Base.Pairs{Symbol, Union{}, Tuple{}, NamedTuple{(), Tuple{}}}, typeof(GarishPrint.pprint), GarishPrint.GarishIO{Base.IOContext{Base.GenericIOBuffer{Array{UInt8, 1}}}}, String})
-    isdefined(GarishPrint, Symbol("##pprint#8")) && precompile(Tuple{GarishPrint.var"##pprint#8", Base.Pairs{Symbol, Union{}, Tuple{}, NamedTuple{(), Tuple{}}}, typeof(GarishPrint.pprint), GarishPrint.GarishIO{Base.IOContext{Base.TTY}}, Float64})
-    isdefined(GarishPrint, Symbol("##pprint#8")) && precompile(Tuple{GarishPrint.var"##pprint#8", Base.Pairs{Symbol, Union{}, Tuple{}, NamedTuple{(), Tuple{}}}, typeof(GarishPrint.pprint), GarishPrint.GarishIO{Base.IOContext{Base.TTY}}, Pair{Int64, Int64}})
-    isdefined(GarishPrint, Symbol("##pprint#8")) && precompile(Tuple{GarishPrint.var"##pprint#8", Base.Pairs{Symbol, Union{}, Tuple{}, NamedTuple{(), Tuple{}}}, typeof(GarishPrint.pprint), GarishPrint.GarishIO{Base.IOContext{Base.TTY}}, Pair{String, Any}})
-    isdefined(GarishPrint, Symbol("##pprint#8")) && precompile(Tuple{GarishPrint.var"##pprint#8", Base.Pairs{Symbol, Union{}, Tuple{}, NamedTuple{(), Tuple{}}}, typeof(GarishPrint.pprint), GarishPrint.GarishIO{Base.IOContext{Base.TTY}}, Pair{String, Number}})
-    isdefined(GarishPrint, Symbol("##pprint#8")) && precompile(Tuple{GarishPrint.var"##pprint#8", Base.Pairs{Symbol, Union{}, Tuple{}, NamedTuple{(), Tuple{}}}, typeof(GarishPrint.pprint), GarishPrint.GarishIO{Base.IOContext{Base.TTY}}, String})
-    isdefined(GarishPrint, Symbol("##pprint#8")) && precompile(Tuple{GarishPrint.var"##pprint#8", Base.Pairs{Symbol, Union{}, Tuple{}, NamedTuple{(), Tuple{}}}, typeof(GarishPrint.pprint), GarishPrint.GarishIO{GarishPrint.GarishIO{Base.TTY}}, Base.Irrational{:π}})
-    isdefined(GarishPrint, Symbol("##pprint#8")) && precompile(Tuple{GarishPrint.var"##pprint#8", Base.Pairs{Symbol, Union{}, Tuple{}, NamedTuple{(), Tuple{}}}, typeof(GarishPrint.pprint), GarishPrint.GarishIO{GarishPrint.GarishIO{Base.TTY}}, Int64})
-    isdefined(GarishPrint, Symbol("##pprint#9")) && precompile(Tuple{GarishPrint.var"##pprint#9", Base.Pairs{Symbol, Bool, Tuple{Symbol}, NamedTuple{(:compact,), Tuple{Bool}}}, typeof(GarishPrint.pprint), Base.TTY, Base.Multimedia.MIME{Symbol("text/plain")}, Int})
-    isdefined(GarishPrint, Symbol("##pprint#9")) && precompile(Tuple{GarishPrint.var"##pprint#9", Base.Pairs{Symbol, Union{}, Tuple{}, NamedTuple{(), Tuple{}}}, typeof(GarishPrint.pprint), Base.TTY, Base.Multimedia.MIME{Symbol("text/plain")}, Int})
     isdefined(GarishPrint, Symbol("##pprint_struct#15")) && precompile(Tuple{GarishPrint.var"##pprint_struct#15", Base.Pairs{Symbol, Bool, Tuple{Symbol}, NamedTuple{(:include_defaults,), Tuple{Bool}}}, typeof(GarishPrint.pprint_struct), Base.TTY, Int})
 
     precompile(Tuple{typeof(GarishPrint.color_scheme)})

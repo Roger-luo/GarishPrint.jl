@@ -22,6 +22,9 @@ end
 
 include("color.jl")
 include("colorschemes.jl")
+
+const COLOR_SCHEME = color_scheme()
+
 include("io.jl")
 include("pprint.jl")
 include("struct.jl")
@@ -31,6 +34,6 @@ include("arrays.jl")
 include("dict.jl")
 include("set.jl")
 
-include("precompile.jl")
+# include("precompile.jl")
 
 end
