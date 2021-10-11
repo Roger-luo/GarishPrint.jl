@@ -34,6 +34,7 @@ include("arrays.jl")
 include("dict.jl")
 include("set.jl")
 
-# include("precompile.jl")
+include("precompile.jl")
+_precompile_()
 
 end

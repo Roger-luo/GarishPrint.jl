@@ -66,5 +66,3 @@ function _precompile_()
     precompile(Tuple{typeof(GarishPrint.print_token), typeof(Base.print), GarishPrint.GarishIO{GarishPrint.GarishIO{Base.IOContext{Base.TTY}}}, Symbol, Type})
     precompile(Tuple{typeof(GarishPrint.print_token), typeof(Base.print), GarishPrint.GarishIO{GarishPrint.GarishIO{Base.TTY}}, Symbol, Type})
 end
-
-_precompile_()
