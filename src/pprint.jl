@@ -65,7 +65,7 @@ function pprint end
 pprint(x; kw...) = pprint(stdout, x; kw...)
 pprint(io::IO, x;kw...) = pprint(io, MIME"text/plain"(), x; kw...)
 # wrap other IO with GarishIO
-pprint(io::IO, m::MIME, x; kw...) = pprint(GarishIO(io; kw...), m, x)
+pprint(io::IO, m::MIME, @nospecialize(x); kw...) = pprint(GarishIO(io; kw...), m, x)
 
 # Type
 pprint(io::GarishIO, mime::MIME, @specialize(x::Type)) = show(io, mime, x)
@@ -82,7 +82,7 @@ function pprint(io::GarishIO, mime::MIME, @nospecialize(x))
     end
 end
 
-function show_text_within(io::GarishIO, mime::MIME, x)
+function show_text_within(io::GarishIO, mime::MIME, @nospecialize(x))
     buf = IOBuffer()
     indentation = io.indent * io.state.level + io.state.offset
     new_displaysize = (io.displaysize[1], io.displaysize[2] - indentation)

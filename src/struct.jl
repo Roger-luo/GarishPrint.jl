@@ -83,9 +83,9 @@ function pprint_struct(io::GarishIO, mime::MIME"text/plain", @nospecialize(x))
     print(io.bland_io, ")")
 end
 
-pprint_field(io::GarishIO, x) = pprint_field(io, MIME"text/plain"(), x)
+pprint_field(io::GarishIO, @nospecialize(x)) = pprint_field(io, MIME"text/plain"(), x)
 
-function pprint_field(io::GarishIO, mime::MIME"text/plain", x)
+function pprint_field(io::GarishIO, mime::MIME"text/plain", @nospecialize(x))
     upperlevel_type = io.state.type
     upperlevel_noindent_in_first_line = io.state.noindent_in_first_line
     io.state.type = StructField
