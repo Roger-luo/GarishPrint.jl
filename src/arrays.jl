@@ -27,7 +27,8 @@ end
 # NOTE: modified based on base/arrayshow.jl:show_zero_dim
 function pprint_zero_dim(io::GarishIO, X::AbstractArray{T, 0}) where T
     if isassigned(X)
-        print(io, "fill(")
+        print_token(io, :call, "fill")
+        print(io, "(")
         pprint(io, X[])
     else
         print_token(io, :type, "Array{", T, ", 0}(")

@@ -66,6 +66,6 @@ Print an operator, such as `=`, `+`, `=>` etc. This should be only used under `M
 """
 function print_operator(io::GarishIO, op)
     io.compact || print(io, " ")
-    print_token(io, :operator, op)
+    print_token(io, :op, op)
     io.compact || print(io, " ")
 end

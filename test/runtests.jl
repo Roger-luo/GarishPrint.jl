@@ -6,6 +6,10 @@ using Test
     end
 end
 
+@testset "colors" begin
+    include("colors.jl")
+end
+
 include("basic.jl")
 include("configs.jl")
 include("dataframe.jl")
