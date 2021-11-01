@@ -34,7 +34,7 @@ PrintState() = PrintState(Unknown, Any, false, 0, 0)
 - `compact::Bool`: whether the printing should be compact.
 - `displaysize::Tuple{Int, Int}`: the terminal displaysize.
 - `show_indent`: print the indentation hint or not.
-- `color`: color preference, either `ColorPreference` or `nothing` for no color.
+- `color`: color preference, either `ColorScheme` or `nothing` for no color.
 - `state`: the state of the printer, see [`PrintState`](@ref).
 """
 struct GarishIO{IO_t <: IO} <: Base.AbstractPipe
@@ -48,7 +48,7 @@ struct GarishIO{IO_t <: IO} <: Base.AbstractPipe
     # option type
     include_defaults::Bool
     # use nothing for no color print
-    color::Union{Nothing, ColorPreference}
+    color::Union{Nothing, ColorScheme}
     state::PrintState
 end
 
@@ -63,17 +63,17 @@ function GarishIO(io::IO;
         limit::Bool=get(io, :limit, false),
         displaysize::Tuple{Int, Int}=displaysize(io),
         color::Bool=get(io, :color, true),
+        color_prefs::Union{Nothing, ColorScheme} = nothing,
         # indent is similar to color
         show_indent::Bool=get(io, :color, true),
         include_defaults::Bool=get(io, :include_defaults, false),
         kw...
     )
 
-    if color
-        color_prefs = ColorPreference(;kw...)
-    else
-        color_prefs = nothing
+    if color && color_prefs === nothing
+        color_prefs = color_scheme(;kw...)
     end
+
     return GarishIO(
         io, indent,
         compact, limit,
@@ -99,7 +99,7 @@ function GarishIO(io::GarishIO;
     if isempty(kw)
         color_prefs = color
     else
-        color_prefs = ColorPreference(;kw...)
+        color_prefs = color_scheme(;kw...)
     end
 
     return GarishIO(
@@ -206,7 +206,7 @@ end
     print_token(io::GarishIO, type::Symbol, xs...)
 
 Print `xs` to a `GarishIO` as given token type. The token type
-should match the field name of `ColorPreference`.
+should match the field name of `ColorScheme`.
 """
 function print_token(io::GarishIO, type::Symbol, xs...)
     print_token(print, io, type, xs...)
@@ -219,7 +219,16 @@ Print `xs` to a `GarishIO` as given token type using `f(io, xs...)`
 """
 function print_token(f, io::GarishIO, type::Symbol, xs...)
     isnothing(io.color) && return f(io, xs...)
-    Base.with_output_color(f, getfield(io.color, type), io, xs...)
+    # workaround :color option
+    get(io, :color, false) || return f(io, xs...)
+    crayon = getfield(io.color, type)
+    # Base.with_output_color
+    buf = IOBuffer()
+    try f(GarishIO(buf, io), xs...)
+    finally
+        str = String(take!(buf))
+        return f(io, crayon(str))
+    end
 end
 
 function max_indent_reached(io::GarishIO, offset::Int)

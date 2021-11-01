@@ -1,6 +1,8 @@
 module GarishPrint
 
 export pprint, pprint_struct
+
+using Crayons
 using Configurations
 
 # 1.0 Compat
@@ -19,6 +21,7 @@ else
 end
 
 include("color.jl")
+include("colorschemes.jl")
 include("io.jl")
 include("pprint.jl")
 include("struct.jl")
