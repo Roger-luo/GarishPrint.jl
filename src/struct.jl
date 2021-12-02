@@ -27,14 +27,10 @@ Print `x` as a struct type with mime type `MIME"text/plain"`.
 function pprint_struct(io::GarishIO, mime::MIME"text/plain", @nospecialize(x))
     t = typeof(x)
     isstructtype(t) || throw(ArgumentError("expect a struct type, got $t"))
-    print_token(io, :type, t); print(io.bland_io, "(")
+    pprint_struct_type(io, mime, t); print(io.bland_io, "(")
 
     nf = nfields(x)::Int
     nf == 0 && return print(io.bland_io, ")")
-
-    # make sure we can print the type in one line, or we should print it in ...
-    # max_indent_reached = io.indent * io.state.level + io.state.offset + length(string(t)) + 2 > io.displaysize[2]
-    max_indent_reached(io, length(string(t)) + 2) && return print(io.bland_io, " … )")
 
     io.compact || println(io.bland_io)
 
@@ -81,6 +77,45 @@ function pprint_struct(io::GarishIO, mime::MIME"text/plain", @nospecialize(x))
     io.compact || println(io.bland_io)
     print_indent(io)
     print(io.bland_io, ")")
+end
+
+function pprint_struct_type(io::GarishIO, mime::MIME"text/plain", @nospecialize(x))
+    if x isa DataType
+        # max_indent_reached = io.indent * io.state.level + io.state.offset + length(string(t)) + 2 > io.displaysize[2]
+        if max_indent_reached(io, length(string(x)) + 2)
+            if isempty(x.parameters)
+                # nothing we can do here, let it break line
+                print_token(io, :type, x)
+            else
+                print_token(io, :type, nameof(x)); print_token(io, :type, "{")
+                println(io.bland_io)
+                within_nextlevel(io) do
+                    len_params = sum(length(string(p)) for p in x.parameters) + 2 * length(x.parameters)
+                    if max_indent_reached(io, len_params)
+                        for p in x.parameters
+                            print_indent(io)
+                            pprint_struct_type(io, mime, p)
+                            print(io.bland_io, ", ")
+                            println(io.bland_io)
+                            # if p !== last(x.parameters)
+                            # end
+                        end
+                    else
+                        # try to print parameters in one line
+                        print_indent(io)
+                        print_token(io, :type, join(x.parameters, ", "))
+                        println(io.bland_io)
+                    end
+                end
+                print_indent(io)
+                print_token(io, :type, "}")
+            end
+        else
+            print_token(io, :type, x)
+        end
+    else
+        print_token(io, :type, x)
+    end
 end
 
 pprint_field(io::GarishIO, x) = pprint_field(io, MIME"text/plain"(), x)
