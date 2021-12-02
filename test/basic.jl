@@ -27,6 +27,11 @@ struct T5{T}
     x::T
 end
 
+struct TTTTTTTTTTTTTTTTTTTT{A,B}
+    x::A
+    y::B
+end
+
 pprint(T1(1))
 
 pprint(T2(1, 2.0))
@@ -57,5 +62,10 @@ pprint(T5(Dict("a"=>T4(T5([1, 2, 3]), T5([1, 2, 3])), "b"=>2im)))
 
 pprint(T5(Dict("a"=>(1, 2, 3), "b"=>Any)))
 
+a = TTTTTTTTTTTTTTTTTTTT(1, 2)
+b = TTTTTTTTTTTTTTTTTTTT(a, a)
+c = TTTTTTTTTTTTTTTTTTTT(b, b)
+
+pprint(c)
 
 end
