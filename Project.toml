@@ -1,7 +1,7 @@
 name = "GarishPrint"
 uuid = "b0ab02a7-8576-43f7-aa76-eaa7c3897c54"
 authors = ["Roger-Luo <rogerluo.rl18@gmail.com> and contributors"]
-version = "0.5.0"
+version = "0.5.1"
 
 [deps]
 Configurations = "5218b696-f38b-4ac9-8b61-a12ec717816d"
