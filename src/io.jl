@@ -174,6 +174,7 @@ function Base.IOContext(io::GarishIO, KVs::Pair...)
     )
 end
 
+Base.show_circular(io::GarishIO, x) = Base.show_circular(io.bland_io, x)
 Base.displaysize(io::GarishIO) = io.displaysize
 Base.in(key_value::Pair, io::GarishIO) = in(key_value, IOContext(io).dict, ===)
 Base.haskey(io::GarishIO, key) = haskey(IOContext(io).dict, key)
