@@ -27,6 +27,10 @@ struct T5{T}
     x::T
 end
 
+mutable struct T6
+    x::Any
+end
+
 struct TTTTTTTTTTTTTTTTTTTT{A,B}
     x::A
     y::B
@@ -61,6 +65,14 @@ pprint(T5(Dict("a"=>2.0, "b"=>2im)))
 pprint(T5(Dict("a"=>T4(T5([1, 2, 3]), T5([1, 2, 3])), "b"=>2im)))
 
 pprint(T5(Dict("a"=>(1, 2, 3), "b"=>Any)))
+
+recur_struct = T6(nothing)
+recur_struct.x = recur_struct
+pprint(recur_struct)
+
+recur_struct_list = T6([])
+push!(recur_struct_list.x, T5(recur_struct_list))
+pprint(recur_struct_list)
 
 a = TTTTTTTTTTTTTTTTTTTT(1, 2)
 b = TTTTTTTTTTTTTTTTTTTT(a, a)

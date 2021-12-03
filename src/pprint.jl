@@ -74,7 +74,7 @@ pprint(io::GarishIO, ::MIME"text/plain", @specialize(x::Type)) = print_token(io,
 # Struct
 function pprint(io::GarishIO, mime::MIME, @nospecialize(x))
     if fallback_to_default_show(io, x) && isstructtype(typeof(x))
-        return pprint_struct(io, mime, x)
+        pprint_struct(io, mime, x)
     elseif io.state.level > 0 # print show inside
         show_text_within(io, mime, x)
     else # fallback to show unless it is a struct type
